@@ -5,7 +5,7 @@ export function formatEthUsd(params) {
 
        let valueeth = value * 1;
 
-	return "$ " + valueeth.toFixed(6);
+	return "₿ " + valueeth.toFixed(8);
 }
 
 export default Ember.Helper.helper(formatEthUsd);

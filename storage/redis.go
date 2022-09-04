@@ -67,13 +67,31 @@ type BlockData struct {
 }
 
 type ExchangeData struct {
-	AveragePrice_BTC uint64     `json:"averagePrice_BTC"`
-	AveragePrice_USD float64    `json:"averagePrice_USD"`
-	TotalVolume      float64    `json:"averagePrice_BTC"`
-	TotalVolume_USD  float64    `json:"averagePrice_BTC"`
-	HighestBid       float64    `json:"averagePrice_BTC"`
-	LowestAsk        float64    `json:"averagePrice_BTC"`
-	Exchanges        []Exchange `json:"exchanges"`
+	Name       string      `json:"name"`
+	BaseUnit   string      `json:"base_unit"`
+	BaseFixed  int         `json:"base_fixed"`
+	BaseFee    float64     `json:"base_fee"`
+	QuoteUnit  string      `json:"quote_unit"`
+	QuoteFixed int         `json:"quote_fixed"`
+	QuoteFee   float64     `json:"quote_fee"`
+	Api        bool        `json:"api"`
+	BaseLot    interface{} `json:"base_lot"`
+	QuoteLot   interface{} `json:"quote_lot"`
+	BaseMin    string      `json:"base_min"`
+	QuoteMin   string      `json:"quote_min"`
+	Blocks     int         `json:"blocks"`
+	BlockTime  string      `json:"block_time"`
+	Wstatus    string      `json:"wstatus"`
+	Low        string      `json:"low"`
+	High       string      `json:"high"`
+	Last       string      `json:"last"`
+	Open       string      `json:"open"`
+	Volume     string      `json:"volume"`
+	Volume2    string      `json:"volume2"`
+	Sell       string      `json:"sell"`
+	Buy        string      `json:"buy"`
+	At         int         `json:"at"`
+	Exchanges  []Exchange  `json:"exchanges"`
 }
 
 type Exchange struct {
@@ -991,8 +1009,12 @@ func (r *RedisClient) CollectStats(smallWindow time.Duration, maxBlocks, maxPaym
 	stats["minersTotal"] = len(miners)
 	stats["hashrate"] = totalHashrate
 
-	exchangedata, _ := cmds[12].(*redis.StringStringMapCmd).Result()
-	stats["exchangedata"] = exchangedata
+	result1, err := cmds[12].(*redis.StringStringMapCmd).Result()
+
+	if err != nil {
+		log.Fatalf("Error while geting Exchange Data => Error : %v", err)
+	}
+	stats["exchangedata"] = convertStringMap(result1)
 
 	finders := convertFindersResults(cmds[13].(*redis.ZSliceCmd))
 	stats["finders"] = finders
@@ -1468,43 +1490,35 @@ func (r *RedisClient) WritePasswordByMiner(login string, password string) {
 	r.client.HSet(r.formatKey("settings", login), "password", password)
 }
 
-//func (r *RedisClient) StoreExchangeData(exchangeData ExchangeData) {
-func (r *RedisClient) StoreExchangeData() {
+func (r *RedisClient) StoreExchangeData(exchangeData ExchangeData) {
 
-	tx := r.client.Multi()
-	defer tx.Close()
-
-	// s := fmt.Sprintf("%f", exchangeData.AveragePrice_USD)
-	//s := "0.00256000"
-	s := fmt.Sprintf("%f", 0.00256000)
-	cmd := tx.HSet(r.formatKey("exchange", "ETC"), "price_usd", s)
+	s := fmt.Sprintf(exchangeData.Last)
+	cmd := r.client.HSet(r.formatKey("exchange", r.CoinName), "price_usd", s)
 
 	err := cmd.Err()
 	if err != nil {
-		log.Printf("Error while Storing %s : Key-%s , value-%s , Error : %v", "etc", "price_usd", s, err)
+		log.Printf("Error while Storing %s : Key-%s , value-%s , Error : %v", r.CoinName, "price_usd", s, err)
 	}
 
 	t := util.MakeTimestamp2()
 	str := strconv.FormatInt(t, 10)
-
-	cmd1 := tx.HSet(r.formatKey("exchange", "ETC"), "last_updated", str)
+	cmd1 := r.client.HSet(r.formatKey("exchange", r.CoinName), "last_updated", str)
 	err1 := cmd1.Err()
 	if err1 != nil {
-		log.Printf("Error while Storing %s : Key-%s , value-%s , Error : %v", "etc", "last_updated", str, err1)
+		log.Printf("Error while Storing %s : Key-%s , value-%s , Error : %v", r.CoinName, "last_updated", str, err1)
 	}
 
-	log.Printf("Writing Exchange Data ")
 	return
 }
 
-func (r *RedisClient) GetExchangeData(coinsymbol string) (map[string]string, error) {
+func (r *RedisClient) GetExchangeData() (map[string]string, error) {
 
-	cmd := r.client.HGetAllMap(r.formatKey("exchange", coinsymbol))
+	cmd := r.client.HGetAllMap(r.formatKey("exchange", r.CoinName))
 
 	result, err := cmd.Result()
 
 	if err != nil {
-		return nil, err
+		log.Printf("Error while Getting %s : Key-%s , Error : %v", r.CoinName, err)
 	}
 
 	return result, err

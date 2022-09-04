@@ -88,43 +88,37 @@ func (u *ExchangeProcessor) Start() {
 
 func (u *ExchangeProcessor) fetchData() {
 
-	//reply, err := u.rpc.GetData()
-	//
-	//if err != nil {
-	//	log.Printf("Failed to fetch data from exchange %v", err)
-	//	//return
-	//}
-	//
-	//log.Printf("Reply %v", reply)
+	reply, err := u.rpc.GetData()
+
+	if err != nil {
+		log.Printf("Failed to fetch data from exchange %v", err)
+		//return
+	}
 
 	//Store the data into the Redis Store
-	//u.backend.StoreExchangeData(reply)
-	u.backend.StoreExchangeData()
-
-	//if err != nil {
-	//	log.Printf("Failed to Store the data to echange %v", err)
-	//	//return
-	//}
+	u.backend.StoreExchangeData(reply)
 
 	return
 }
 
 func (r *RestClient) doPost(url string) ([]byte, error) {
 
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Accept", "application/json")
 
-	resp, err := r.client.Get(url)
+	//resp, err := r.client.Get(url)
+	resp, err := r.client.Do(req)
+
 	if err != nil {
+		log.Printf("xxxxxxxxxxxxx %v", err)
 		return nil, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 200 { // OK
-		bodyBytes, err2 := ioutil.ReadAll(resp.Body)
-
-		return bodyBytes, err2
+		responseBody, err2 := ioutil.ReadAll(resp.Body)
+		return responseBody, err2
 	}
 
 	return nil, err
