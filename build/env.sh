@@ -11,10 +11,10 @@ fi
 workspace="$PWD/build/_workspace"
 root="$PWD"
 ethdir="$workspace/src/github.com/daefrom"
-if [ ! -L "$ethdir/pool" ]; then
+if [ ! -L "$ethdir/dae-pool" ]; then
     mkdir -p "$ethdir"
     cd "$ethdir"
-    ln -s ../../../../../. pool
+    ln -s ../../../../../. dae-pool
     cd "$root"
 fi
 
@@ -25,8 +25,8 @@ GOBIN="$PWD/build/bin"
 export GOPATH GOBIN
 
 # Run the command inside the workspace.
-cd "$ethdir/pool"
-PWD="$ethdir/pool"
+cd "$ethdir/dae-pool"
+PWD="$ethdir/dae-pool"
 
 # Launch the arguments with the configured environment.
 exec "$@"
