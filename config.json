@@ -4,7 +4,7 @@
 	"name": "main",
 	"pplns": 100000,
 	"coin-name":"DAE",
-	"coin-solo": "etc-solo",
+	"coin-solo": "dae-solo",
 
 	"proxy": {
 		"enabled": true,
@@ -16,10 +16,10 @@
 		"stateUpdateInterval": "3s",
 		"difficulty": 4000000000,
 		"hashrateExpiration": "3h",
-    "stratumHostname": "daepool.com",
+        "stratumHostname": "daepool.com",
 
 		"healthCheck": true,
-   	"debug": true,
+     	"debug": true,
 		"maxFails": 100,
 
 		"stratum": {
@@ -27,7 +27,7 @@
 			"listen": "0.0.0.0:4444",
 			"timeout": "120s",
 			"maxConn": 8192,
-      "tls": false,
+            "tls": false,
 			"certFile": "/home/var/pool/fullchain1.pem",
 			"keyFile": "/home/var/pool/privkey1.pem"
 		},
