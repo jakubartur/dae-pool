@@ -1,4 +1,4 @@
-## Open Source DAE Mining Pool
+## Open Source DAE Mining Pool PPLNS/SOLO
 
 **This pool is being further developed to provide an easy to use pool for DAE miners. Testing and bug submissions are welcome!**
 
@@ -8,7 +8,7 @@
 * Modern beautiful Ember.js frontend
 * Separate stats for workers: can highlight timed-out workers so miners can perform maintenance of rigs
 * JSON-API for stats
-* PPLNS
+* PPLNS/SOLO
 
 #### Proxies
 
