@@ -50,6 +50,8 @@ func (s *ProxyServer) processShare(login, id, ip string, t *BlockTemplate, param
 	//Write the Ip address into the settings:login:ipaddr and timeit added to settings:login:iptime hash
 	s.backend.LogIP(login, ip)
 
+	miningType := s.backend.GetMiningType(login)
+
 	if hasher.Verify(block) {
 		ok, err := s.rpc().SubmitBlock(params)
 		if err != nil {
@@ -59,25 +61,47 @@ func (s *ProxyServer) processShare(login, id, ip string, t *BlockTemplate, param
 			return false, false
 		} else {
 			s.fetchBlockTemplate()
-			exist, err := s.backend.WriteBlock(login, id, params, shareDiff, h.diff.Int64(), h.height, s.hashrateExpiration, stratumHostname)
-			if exist {
-
-				return true, false
-			}
-			if err != nil {
-				log.Println("Failed to insert block candidate into backend:", err)
+			if miningType == "solo" {
+				exist, err := s.backend.WriteBlockSolo(login, id, params, shareDiff, h.diff.Int64(), h.height, s.hashrateExpiration, stratumHostname)
+				if exist {
+					return true, false
+				}
+				if err != nil {
+					log.Println("Failed to insert block candidate into backend:", err)
+				} else {
+					log.Printf("Inserted block %v to backend", h.height)
+				}
 			} else {
-				log.Printf("Inserted block %v to backend", h.height)
+				exist, err := s.backend.WriteBlock(login, id, params, shareDiff, h.diff.Int64(), h.height, s.hashrateExpiration, stratumHostname)
+				if exist {
+					return true, false
+				}
+				if err != nil {
+					log.Println("Failed to insert block candidate into backend:", err)
+				} else {
+					log.Printf("Inserted block %v to backend", h.height)
+				}
 			}
+
 			log.Printf("Block found by miner %v@%v at height %d", login, ip, h.height)
 		}
 	} else {
-		exist, err := s.backend.WriteShare(login, id, params, shareDiff, h.height, s.hashrateExpiration, stratumHostname)
-		if exist {
-			return true, false
-		}
-		if err != nil {
-			log.Println("Failed to insert share data into backend:", err)
+		if miningType == "solo" {
+			exist, err := s.backend.WriteShareSolo(login, id, params, shareDiff, h.height, s.hashrateExpiration, stratumHostname)
+			if exist {
+				return true, false
+			}
+			if err != nil {
+				log.Println("Failed to insert share data into backend:", err)
+			}
+		} else {
+			exist, err := s.backend.WriteShare(login, id, params, shareDiff, h.height, s.hashrateExpiration, stratumHostname)
+			if exist {
+				return true, false
+			}
+			if err != nil {
+				log.Println("Failed to insert share data into backend:", err)
+			}
 		}
 	}
 	return false, true

@@ -161,8 +161,9 @@ span.logo-1 {
 }
 
 span.logo-2 {
-  font-weight: 300;
-  color: #FFF;
+  font-weight: 600;
+  color: #FFBF00;
+  font-size: 15px;
 }
 
 span.logo-3 {

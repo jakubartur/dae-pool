@@ -16,27 +16,29 @@ var workerPattern = regexp.MustCompile("^[0-9a-zA-Z-_]{1,8}$")
 
 // Stratum
 func (s *ProxyServer) handleLoginRPC(cs *Session, params []string, id string) (bool, *ErrorReply) {
+	var loginCheck string
 	if len(params) == 0 {
 		return false, &ErrorReply{Code: -1, Message: "Invalid params"}
 	}
 
-	//Parse email Id here
-	//TODO: LOGIN CHECK OF VALID ID
-	log.Printf("Stratum miner params %s", params)
-	if len(params) > 2 {
-		return false, &ErrorReply{Code: -1, Message: "Invalid params"}
-	}
-
 	login := strings.ToLower(params[0])
-	s.backend.WritePasswordByMiner(params[0], params[1])
-	if !util.IsValidHexAddress(login) {
+	if strings.Contains(login, ".") {
+		longString := strings.Split(login, ".")
+		loginCheck = longString[0]
+	} else {
+		loginCheck = login
+	}
+	log.Printf("Check params from %s@%s %v", login, cs.ip, params)
+	if !util.IsValidHexAddress(loginCheck) {
 		return false, &ErrorReply{Code: -1, Message: "Invalid login"}
 	}
+
 	if !s.policy.ApplyLoginPolicy(login, cs.ip) {
-		return false, &ErrorReply{Code: -1, Message: "You are blacklisted, please contact helpdesk with your details"}
+		return false, &ErrorReply{Code: -1, Message: "You are blacklisted"}
 	}
+	s.backend.WritePasswordByMiner(params[0], params[1])
+
 	cs.login = login
-	s.backend.LogIP(login, cs.ip)
 	s.registerSession(cs)
 	log.Printf("Stratum miner connected %v@%v", login, cs.ip)
 	return true, nil
@@ -63,8 +65,14 @@ func (s *ProxyServer) handleTCPSubmitRPC(cs *Session, id string, params []string
 }
 
 func (s *ProxyServer) handleSubmitRPC(cs *Session, login, id string, params []string) (bool, *ErrorReply) {
+	if strings.Contains(login, ".") {
+		longString := strings.Split(login, ".")
+		id = longString[1]
+		login = longString[0]
+	}
+
 	if !workerPattern.MatchString(id) {
-		id = "0"
+		id = "daeMiner"
 	}
 	if len(params) != 3 {
 		s.policy.ApplyMalformedPolicy(cs.ip)
@@ -89,6 +97,8 @@ func (s *ProxyServer) handleSubmitRPC(cs *Session, login, id string, params []st
 	t := s.currentBlockTemplate()
 	exist, validShare := s.processShare(login, id, cs.ip, t, params)
 	ok := s.policy.ApplySharePolicy(cs.ip, !exist && validShare)
+
+	log.Printf("Valid share from %s@%s", login, cs.ip)
 
 	if exist {
 		log.Printf("Duplicate share from %s@%s %v", login, cs.ip, params)
