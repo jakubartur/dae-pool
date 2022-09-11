@@ -1037,6 +1037,7 @@ func (r *RedisClient) CollectWorkersStats(sWindow, lWindow time.Duration, login 
 		tx.ZRangeWithScores(r.formatKey("hashrate", login), 0, -1)
 		tx.ZRevRangeWithScores(r.formatKey("rewards", login), 0, 39)
 		tx.ZRevRangeWithScores(r.formatKey("rewards", login), 0, -1)
+		tx.HGetAllMap(r.formatKey("exchange", r.CoinName))
 
 		return nil
 	})
@@ -1131,6 +1132,12 @@ func (r *RedisClient) CollectWorkersStats(sWindow, lWindow time.Duration, login 
 	}
 	stats["miningTypeSolo"] = miningTypeSolo
 	stats["miningTypePplns"] = miningTypePplns
+	result1, err := cmds[4].(*redis.StringStringMapCmd).Result()
+
+	if err != nil {
+		log.Fatalf("Error while geting Exchange Data => Error : %v", err)
+	}
+	stats["exchangedata"] = convertStringMap(result1)
 	return stats, nil
 }
 
