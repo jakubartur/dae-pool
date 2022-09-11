@@ -4,7 +4,7 @@
 	"name": "main",
 	"pplns": 100000,
 	"coin-name":"DAE",
-	"coin-solo": "etc-solo",
+	"coin-solo": "dae-solo",
 
 	"proxy": {
 		"enabled": false
