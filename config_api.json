@@ -2,7 +2,7 @@
 	"threads": 2,
 	"coin": "dae-pplns",
 	"name": "main",
-	"pplns": 100000,
+	"pplns": 1000,
 	"coin-name":"DAE",
 	"coin-solo": "dae-solo",
 

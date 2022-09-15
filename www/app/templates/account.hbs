@@ -82,14 +82,21 @@
       </div>
 
 
+
+
       <div class="col-lg-3 col-md-6">
           <!-- small box -->
           <div class="small-box bg-dark-blue">
               <div class="inner ">
                   <h3><span class="text-white">
-                      {{format-relative (seconds-to-ms (string-to-int model.stats.lastShare))}}
+                    {{format-relative (seconds-to-ms (string-to-int model.stats.lastShare))}}
                   </span> </h3>
+                {{#if model.miningTypeSolo}}
+                  <p> Last Block Found:   </p>
+                {{else}}
                   <p> Last Share Submitted:   </p>
+                {{/if}}
+
               </div>
           </div>
       </div>

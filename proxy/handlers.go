@@ -21,7 +21,14 @@ func (s *ProxyServer) handleLoginRPC(cs *Session, params []string, id string) (b
 		return false, &ErrorReply{Code: -1, Message: "Invalid params"}
 	}
 
-	login := strings.ToLower(params[0])
+	//Parse email Id here
+	//TODO: LOGIN CHECK OF VALID ID
+	log.Printf("Stratum miner params %s => %v", params, len(params))
+	if len(params) > 2 {
+		return false, &ErrorReply{Code: -1, Message: "Invalid params"}
+	}
+
+	login := params[0]
 	if strings.Contains(login, ".") {
 		longString := strings.Split(login, ".")
 		loginCheck = longString[0]
@@ -36,7 +43,10 @@ func (s *ProxyServer) handleLoginRPC(cs *Session, params []string, id string) (b
 	if !s.policy.ApplyLoginPolicy(login, cs.ip) {
 		return false, &ErrorReply{Code: -1, Message: "You are blacklisted"}
 	}
-	s.backend.WritePasswordByMiner(params[0], params[1])
+
+	if len(params) > 1 {
+		s.backend.WritePasswordByMiner(params[0], params[1])
+	}
 
 	cs.login = login
 	s.registerSession(cs)

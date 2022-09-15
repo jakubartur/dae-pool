@@ -486,7 +486,14 @@ func (s *ApiServer) AccountIndex(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		stats, err := s.backend.GetMinerStats(login, s.config.Payments)
+		miningType := s.backend.GetMiningType(login)
+		var stats map[string]interface{}
+		if miningType == "solo" {
+			stats, err = s.backend.GetMinerStatsSolo(login, s.config.Payments)
+		} else {
+			stats, err = s.backend.GetMinerStats(login, s.config.Payments)
+		}
+
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Printf("Failed to fetch stats from backend: %v", err)

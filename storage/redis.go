@@ -506,7 +506,7 @@ func (r *RedisClient) writeShareSolo(tx *redis.Multi, ms, ts int64, login, id st
 	tx.ZAdd(r.formatKey("hashrate", login), redis.Z{Score: float64(ts), Member: join(diff, id, ms, diff, hostname)})
 	// Will delete hashrates for miners that gone
 	tx.Expire(r.formatKey("hashrate", login), expire)
-	tx.HSet(r.formatKey("miners_solo", login), "lastShare", strconv.FormatInt(ts, 10))
+	tx.HSet(r.formatKey("miners_solo", login), "lastShare_solo", strconv.FormatInt(ts, 10))
 }
 
 func (r *RedisClient) formatKey(args ...interface{}) string {
@@ -986,11 +986,11 @@ func (r *RedisClient) GetMinerStatsSolo(login string, maxPayments int64) (map[st
 		tx.HGetAllMap(r.formatKey("miners", login))
 		tx.ZRevRangeWithScores(r.formatKey("payments", login), 0, maxPayments-1)
 		tx.HGet(r.formatKey("paymentsTotal"), login)
-		tx.HGet(r.formatKey("shares", "roundCurrent_solo"), login)
-		tx.LRange(r.formatKey("lastshares_solo"), 0, 0)
-		tx.ZRevRangeWithScores(r.formatKey("rewards", login), 0, 39)
-		tx.ZRevRangeWithScores(r.formatKey("rewards", login), 0, -1)
-		tx.LLen(r.formatKey("lastshares_solo"))
+		//tx.HGet(r.formatKey("shares", "roundCurrent"), login)
+		//tx.LRange(r.formatKey("lastshares"), 0, 0)
+		//tx.ZRevRangeWithScores(r.formatKey("rewards", login), 0, 39)
+		//tx.ZRevRangeWithScores(r.formatKey("rewards", login), 0, -1)
+		//tx.LLen(r.formatKey("lastshares"))
 
 		return nil
 	})
