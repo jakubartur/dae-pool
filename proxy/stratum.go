@@ -155,7 +155,7 @@ func (cs *Session) handleTCPMessage(s *ProxyServer, req *StratumReq) error {
 			return cs.sendTCPError(req.Id, errReply)
 		}
 		cs.setStratumMode("EthProxy")
-		log.Println("EthProxy login", cs.ip)
+		//log.Println("EthProxy login", cs.ip)
 		return cs.sendTCPResult(req.Id, reply)
 
 	case "mining.subscribe":

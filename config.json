@@ -16,10 +16,10 @@
 		"stateUpdateInterval": "3s",
 		"difficulty": 4000000000,
 		"hashrateExpiration": "3h",
-        "stratumHostname": "daepool.com",
+		"stratumHostname": "daepool.com",
+		"debug": false,
 
 		"healthCheck": true,
-     	"debug": true,
 		"maxFails": 100,
 
 		"stratum": {

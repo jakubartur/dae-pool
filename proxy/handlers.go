@@ -23,7 +23,7 @@ func (s *ProxyServer) handleLoginRPC(cs *Session, params []string, id string) (b
 
 	//Parse email Id here
 	//TODO: LOGIN CHECK OF VALID ID
-	log.Printf("Stratum miner params %s => %v", params, len(params))
+	// log.Printf("Stratum miner params %s => %v", params, len(params))
 	if len(params) > 2 {
 		return false, &ErrorReply{Code: -1, Message: "Invalid params"}
 	}
@@ -35,7 +35,7 @@ func (s *ProxyServer) handleLoginRPC(cs *Session, params []string, id string) (b
 	} else {
 		loginCheck = login
 	}
-	log.Printf("Check params from %s@%s %v", login, cs.ip, params)
+	//log.Printf("Check params from %s@%s %v", login, cs.ip, params)
 	if !util.IsValidHexAddress(loginCheck) {
 		return false, &ErrorReply{Code: -1, Message: "Invalid login"}
 	}
@@ -45,12 +45,12 @@ func (s *ProxyServer) handleLoginRPC(cs *Session, params []string, id string) (b
 	}
 
 	if len(params) > 1 {
-		s.backend.WritePasswordByMiner(params[0], params[1])
+		s.backend.WritePasswordByMiner(login, params[1])
 	}
 
 	cs.login = login
 	s.registerSession(cs)
-	log.Printf("Stratum miner connected %v@%v", login, cs.ip)
+	//log.Printf("Stratum miner connected %v@%v", login, cs.ip)
 	return true, nil
 }
 
@@ -108,7 +108,7 @@ func (s *ProxyServer) handleSubmitRPC(cs *Session, login, id string, params []st
 	exist, validShare := s.processShare(login, id, cs.ip, t, params)
 	ok := s.policy.ApplySharePolicy(cs.ip, !exist && validShare)
 
-	log.Printf("Valid share from %s@%s", login, cs.ip)
+	//log.Printf("Valid share from %s@%s", login, cs.ip)
 
 	if exist {
 		log.Printf("Duplicate share from %s@%s %v", login, cs.ip, params)
@@ -120,7 +120,7 @@ func (s *ProxyServer) handleSubmitRPC(cs *Session, login, id string, params []st
 	}
 
 	if !validShare {
-		log.Printf("Invalid share from %s@%s", login, cs.ip)
+		//	log.Printf("Invalid share from %s@%s", login, cs.ip)
 		// Bad shares limit reached, return error and close
 		if !ok {
 			return false, &ErrorReply{Code: 23, Message: "Invalid share"}
@@ -128,7 +128,7 @@ func (s *ProxyServer) handleSubmitRPC(cs *Session, login, id string, params []st
 		return false, nil
 	}
 	if s.config.Proxy.Debug {
-		log.Printf("Valid share from %s@%s", login, cs.ip)
+		//	log.Printf("Valid share from %s@%s", login, cs.ip)
 	}
 
 	if !ok {

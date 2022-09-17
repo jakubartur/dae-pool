@@ -319,7 +319,7 @@ func (r *RedisClient) GetNetworkDifficulty() (*big.Int, error) {
 
 func (r *RedisClient) LogIP(login string, ip string) {
 
-	r.client.HSet(r.formatKey("settings", login), "ip_addr", ip)
+	r.client.HSet(r.formatKey("settings", login), "ip_address", ip)
 	r.client.HSet(r.formatKey("settings", login), "status", "online")
 	r.client.HSet(r.formatKey("settings", login), "email_sent", "0")
 
@@ -392,7 +392,7 @@ func (r *RedisClient) WriteBlock(login, id string, params []string, diff, roundD
 		} else {
 			s = join(hashHex, ts, roundDiff, totalShares, login, id, "solo")
 		}
-		log.Println("CANDIDATES s :  ", s)
+		//log.Println("CANDIDATES s :  ", s)
 		cmd := r.client.ZAdd(r.formatKey("blocks", "candidates"), redis.Z{Score: float64(height), Member: s})
 		return false, cmd.Err()
 	}
@@ -461,7 +461,7 @@ func (r *RedisClient) WriteBlockSolo(login, id string, params []string, diff, ro
 		} else {
 			s = join(hashHex, ts, roundDiff, totalShares, login, id, "solo")
 		}
-		log.Println("CANDIDATES s :  ", s)
+		//log.Println("CANDIDATES s :  ", s)
 		cmd := r.client.ZAdd(r.formatKey("blocks", "candidates"), redis.Z{Score: float64(height), Member: s})
 		return false, cmd.Err()
 	}
@@ -1615,7 +1615,8 @@ func convertPaymentsResults(raw *redis.ZSliceCmd) []map[string]interface{} {
 }
 
 func (r *RedisClient) GetIP(login string) string {
-	cmd := r.client.HGet(r.formatKey("settings", login), "ip_addr")
+	login = strings.ToLower(login)
+	cmd := r.client.HGet(r.formatKey("settings", login), "ip_address")
 	if cmd.Err() == redis.Nil {
 		return "NA"
 	} else if cmd.Err() != nil {
@@ -1625,6 +1626,7 @@ func (r *RedisClient) GetIP(login string) string {
 }
 
 func (r *RedisClient) GetPassword(login string) string {
+	login = strings.ToLower(login)
 	cmd := r.client.HGet(r.formatKey("settings", login), "password")
 	if cmd.Err() == redis.Nil {
 		return "NA"
@@ -1635,24 +1637,29 @@ func (r *RedisClient) GetPassword(login string) string {
 }
 
 func (r *RedisClient) SetIP(login string, ip string) {
+	login = strings.ToLower(login)
 	r.client.HSet(r.formatKey("settings", login), "ip_address", ip)
 }
 
 func (r *RedisClient) SetMailAddress(login string, email string) (bool, error) {
+	login = strings.ToLower(login)
 	cmd, err := r.client.HSet(r.formatKey("settings", login), "email", email).Result()
 	return cmd, err
 }
 
 func (r *RedisClient) SetAlert(login string, alert string) (bool, error) {
+	login = strings.ToLower(login)
 	cmd, err := r.client.HSet(r.formatKey("settings", login), "alert", alert).Result()
 	return cmd, err
 }
 
 func (r *RedisClient) SetMiningType(login string, miningType string) {
+	login = strings.ToLower(login)
 	r.client.HSet(r.formatKey("settings", login), "miningType", miningType)
 }
 
 func (r *RedisClient) WritePasswordByMiner(login string, password string) {
+	login = strings.ToLower(login)
 	r.client.HSet(r.formatKey("settings", login), "password", password)
 }
 
@@ -1752,6 +1759,7 @@ func convertMinerChartsResults(raw *redis.ZSliceCmd) []*MinerCharts {
 }
 
 func (r *RedisClient) GetMiningType(login string) string {
+	login = strings.ToLower(login)
 	cmd := r.client.HGet(r.formatKey("settings", login), "miningType")
 	//log.Println("MINING TYPE for : ", login)
 	if cmd.Err() == redis.Nil {
@@ -1766,6 +1774,7 @@ func (r *RedisClient) GetMiningType(login string) string {
 }
 
 func (r *RedisClient) GetMinerCharts(hashNum int64, login string) (stats []*MinerCharts, err error) {
+	login = strings.ToLower(login)
 	tx := r.client.Multi()
 	defer tx.Close()
 	now := util.MakeTimestamp() / 1000
@@ -1783,6 +1792,7 @@ func (r *RedisClient) GetMinerCharts(hashNum int64, login string) (stats []*Mine
 }
 
 func (r *RedisClient) GetPaymentCharts(login string) (stats []*PaymentCharts, err error) {
+	login = strings.ToLower(login)
 	tx := r.client.Multi()
 	defer tx.Close()
 	cmds, err := tx.Exec(func() error {

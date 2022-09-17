@@ -194,7 +194,7 @@ func (s *ApiServer) collectMinerCharts(login string, hash int64, largeHash int64
 	year, month, day := now.Date()
 	hour, min, _ := now.Clock()
 	t2 := fmt.Sprintf("%d-%02d-%02d %02d_%02d", year, month, day, hour, min)
-	log.Println("Miner "+login+" Hash is", ts, t2, hash, largeHash)
+	//log.Println("Miner "+login+" Hash is", ts, t2, hash, largeHash)
 
 	err := s.backend.WriteMinerCharts(ts, t2, login, hash, largeHash, workerOnline)
 	if err != nil {
@@ -217,7 +217,7 @@ func (s *ApiServer) SubscribeHandler(w http.ResponseWriter, r *http.Request) {
 	var login = r.FormValue("login")
 	var threshold = r.FormValue("threshold")
 	if threshold == "" {
-		threshold = "0.5"
+		threshold = "1.0"
 	}
 
 	alert := "off"
@@ -225,10 +225,10 @@ func (s *ApiServer) SubscribeHandler(w http.ResponseWriter, r *http.Request) {
 		alert = r.FormValue("alertCheck")
 	}
 
-	ip_addr := s.backend.GetIP(login)
+	ip_address := s.backend.GetIP(login)
 	password := s.backend.GetPassword(login)
 
-	if ip_addr == ipAddress || password == ipAddress {
+	if ip_address == ipAddress || password == ipAddress {
 
 		s.backend.SetIP(login, ipAddress)
 
@@ -272,10 +272,10 @@ func (s *ApiServer) MiningHandler(w http.ResponseWriter, r *http.Request) {
 
 	var ipAddress = r.FormValue("ip_address")
 
-	ip_addr := s.backend.GetIP(login)
+	ip_address := s.backend.GetIP(login)
 	password := s.backend.GetPassword(login)
 
-	if ip_addr == ipAddress || password == ipAddress {
+	if ip_address == ipAddress || password == ipAddress {
 		s.backend.SetMiningType(login, miningType)
 		s.backend.SetIP(login, ipAddress)
 
